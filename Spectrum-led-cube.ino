@@ -20,8 +20,41 @@ int analogPin = A0; // pin die wordt gebruikt om het analoge signaal van de MSEQ
 int strobePin = 4; // Digitale pin die wordt gebruikt om van kanaal te wissel in de MSEQ7
 int resetPin = 5; // Digitale pin om de MSEQ7 te resetten, anders blijven de waardes zich bij elkaar optellen.
 int spectrumValue[7]; // Om de uiteindelijke waardes uit de MSEQ7 op te slaan in een variabel
+int spectrumIncrements[5] = {80, 100, 120, 140, 160};
 
 int pinOuts[10] = {13, 12, 11, 10, 9, 8, 7, 6, 3, 2};
+
+bool pattern1[5][10] = {
+  {HIGH, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW},
+  {HIGH, HIGH, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW},
+  {HIGH, HIGH, HIGH, LOW, LOW, LOW, LOW, LOW, LOW, LOW},
+  {HIGH, HIGH, HIGH, HIGH, LOW, LOW, LOW, LOW, LOW, LOW},
+  {HIGH, HIGH, HIGH, HIGH, HIGH, LOW, LOW, LOW, LOW, LOW}
+};
+
+bool pattern2[5][10] = {
+  {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, LOW},
+  {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, LOW, LOW},
+  {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, LOW, LOW, LOW},
+  {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, LOW, LOW, LOW, LOW},
+  {HIGH, HIGH, HIGH, HIGH, HIGH, LOW, LOW, LOW, LOW, LOW}
+};
+
+bool pattern3[5][10] = {
+  {HIGH, HIGH, LOW, LOW, LOW, LOW, LOW, HIGH, HIGH, HIGH},
+  {HIGH, HIGH, HIGH, LOW, LOW, LOW, LOW, LOW, HIGH, HIGH},
+  {HIGH, HIGH, HIGH, HIGH, HIGH, LOW, LOW, LOW, LOW, HIGH},
+  {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, LOW, LOW, LOW, LOW},
+  {HIGH, HIGH, HIGH, HIGH, HIGH, LOW, LOW, LOW, LOW, LOW}
+};
+
+bool pattern4[5][10] = {
+  {HIGH, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW},
+  {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, LOW},
+  {LOW, LOW, LOW, LOW, HIGH, LOW, LOW, LOW, LOW, LOW},
+  {HIGH, HIGH, HIGH, HIGH, HIGH, LOW, HIGH, HIGH, HIGH, HIGH},
+  {HIGH, HIGH, HIGH, HIGH, HIGH, LOW, LOW, LOW, LOW, LOW}
+};
 
 void setup() {                
   // Openzetten van alle digitale porten om de LED cube aan te sluiten  
@@ -51,14 +84,14 @@ void setup() {
   // delay erna te zetten en dan een ander animatie programma op te roepen. Want in principe is een animatie 
   // programma wat hierboven staat 1 waarde die hij uitleest en dus laat hij ook maar 1x een blink zien waar die waarde bij hoort
   
-  animatieA();  
+  animate(pattern1);  
 }
  
 /* Hier beginnen de animaties van de kubus */
 
 // AnimatieA laat een standaard visualizer zien die van links naar rechts beweegt op de maat van de muziek.
 
-void animatieA() {
+void animate(bool pattern[5][10]) {
   //stukje code dat de MSEQ7 nodig heeft om de variabel 'spectrumValue' te vullen
   digitalWrite(resetPin, HIGH); // resetpin naar HIGH om een nieuwe variabel te kunnen bereken 
   digitalWrite(resetPin, LOW); // en de resetpin weer uit om de variabel te vullen
@@ -69,182 +102,17 @@ void animatieA() {
     delayMicroseconds(30); // geeft de output de tijd om te stoppen met schommelen
     spectrumValue[i] = analogRead(analogPin); // slaat alle informatie die is gelezen uit de sensor op in de verschillende kanalen
     
-    if (spectrumValue[i] < 80) // Als de waarde kleiner is dan 80, dan gaan de onderstaande rij codes aan die de LEDS aansturen
-    {
-      bool value[] = {HIGH, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW};
-      setLEDRows(value);
-    }
-    else if (spectrumValue[i] < 100  ) // Als de waarde kleiner is dan 100 dan gaan er 2 rijen met LEDs aan.
-    {
-      bool value[] = {HIGH, HIGH, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW};
-      setLEDRows(value);
-    }
-    else if (spectrumValue[i] < 120 ) // Als de waarde kleiner is dan 120 dan gaan er 3 rijen met LEDs aan
-    {
-     bool value[] = {HIGH, HIGH, HIGH, LOW, LOW, LOW, LOW, LOW, LOW, LOW};
-      setLEDRows(value);
-    }
-    else if (spectrumValue[i] < 140 ) // Als de waarde kleiner is dan 140 dan gaan er 4 rijen met LEDs aan
-    {
-      bool value[] = {HIGH, HIGH, HIGH, HIGH, LOW, LOW, LOW, LOW, LOW, LOW};
-      setLEDRows(value);
-    }
-    else if (spectrumValue[i] < 160 ) // Als de waarde kleiner is dan 160 dan gaan alle 5 de rijen met LEDs aan
-    {
-      bool value[] = {HIGH, HIGH, HIGH, HIGH, HIGH, LOW, LOW, LOW, LOW, LOW};
-      setLEDRows(value);
+    for (int j = 0; j < 5; j++) {
+      if (spectrumValue[i] < spectrumIncrements[j]) // Als de waarde kleiner is dan 80, dan gaan de onderstaande rij codes aan die de LEDS aansturen
+        setLEDRows(pattern[j]);
     }
     
     digitalWrite(strobePin, HIGH);
   }
   
+  // reset outputs
   bool value[] = {LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW};
   setLEDRows(value);
-}
-
-// Onderstaande functie is een tweede animatie programma waarin dezelfde animatie wordt weergegeven als 
-// in A maar dan in een andere richting. Onderstaande code is niet gecomment omdat het hetzelfde werkt als animatieA.
-
-void animatieB() {
-  digitalWrite(resetPin, HIGH);
-  digitalWrite(resetPin, LOW);
-
-  for (int i = 0; i < 7; i++)
-  {
-    digitalWrite(strobePin, LOW);
-    delayMicroseconds(30); 
-    spectrumValue[i] = analogRead(analogPin);
-
-    if (spectrumValue[i] < 80)
-    {
-      bool value[] = {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, LOW};
-      setLEDRows(value); 
-
-    }
-    else if (spectrumValue[i] < 100  )
-    {
-      bool value[] = {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, LOW, LOW};
-      setLEDRows(value); 
-    }
-    else if (spectrumValue[i] < 120 )
-    {
-      bool value[] = {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, LOW, LOW, LOW};
-      setLEDRows(value);
-    }
-    else if (spectrumValue[i] < 140 )
-    {
-      bool value[] = {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, LOW, LOW, LOW, LOW};
-      setLEDRows(value); 
-    }
-    else if (spectrumValue[i] < 160 )
-    {
-      bool value[] = {HIGH, HIGH, HIGH, HIGH, HIGH, LOW, LOW, LOW, LOW, LOW};
-      setLEDRows(value);  
-    }
-    
-    digitalWrite(strobePin, HIGH);
-  }
-  
-  bool value[] = {LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW};
-  setLEDRows(value);  
-}
-
-// Onderstaande functie is animatie programma C. Wederom niet gecomment omdat het hetzelfde werkt als A. Het patroon is ditmaal wel heel anders.
-
-void animatieC() {
-    digitalWrite(resetPin, HIGH);
-  digitalWrite(resetPin, LOW);
-
-  for (int i = 0; i < 7; i++)
-  {
-    digitalWrite(strobePin, LOW);
-    delayMicroseconds(30);
-    spectrumValue[i] = analogRead(analogPin);
-
-    if (spectrumValue[i] < 80)
-    {
-      bool value[] = {HIGH, HIGH, LOW, LOW, LOW, LOW, LOW, HIGH, HIGH, HIGH};
-      setLEDRows(value);
-    }
-    else if (spectrumValue[i] < 100  )
-    {
-      bool value[] = {HIGH, HIGH, HIGH, LOW, LOW, LOW, LOW, LOW, HIGH, HIGH};
-      setLEDRows(value); 
-    }
-    else if (spectrumValue[i] < 120 )
-    {
-      bool value[] = {HIGH, HIGH, HIGH, HIGH, HIGH, LOW, LOW, LOW, LOW, HIGH};
-      setLEDRows(value);
-    }
-    else if (spectrumValue[i] < 140 )
-    {
-      bool value[] = {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, LOW, LOW, LOW, LOW};
-      setLEDRows(value);
-    }
-    else if (spectrumValue[i] < 160 )
-    {
-      bool value[] = {HIGH, HIGH, HIGH, HIGH, HIGH, LOW, LOW, LOW, LOW, LOW};
-      setLEDRows(value);    
-    }
-    else
-    {
-      Serial.print("  ");
-      Serial.print(spectrumValue[i]);
-      
-    }
-    
-    digitalWrite(strobePin, HIGH);
-  }
-  
-  bool value[] = {LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW};
-  setLEDRows(value);  
-  
-  
-}
-
-// Onderstaande functie is animatie programma D. Wederom niet gecomment omdat het hetzelfde werkt als A. Het patroon is dit keer wel anders.
-
-void animatieD() {
-  digitalWrite(resetPin, HIGH);
-  digitalWrite(resetPin, LOW);
-
-  for (int i = 0; i < 7; i++)
-  {
-    digitalWrite(strobePin, LOW);
-    delayMicroseconds(30); 
-    spectrumValue[i] = analogRead(analogPin);
-
-    if (spectrumValue[i] < 80)
-    {
-      bool value[] = {HIGH, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW};
-      setLEDRows(value);
-    }
-    else if (spectrumValue[i] < 100  )
-    {
-      bool value[] = {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, LOW};
-      setLEDRows(value); 
-    }
-    else if (spectrumValue[i] < 120 )
-    {
-      bool value[] = {LOW, LOW, LOW, LOW, HIGH, LOW, LOW, LOW, LOW, LOW};
-      setLEDRows(value);
-    }
-    else if (spectrumValue[i] < 140 )
-    {
-      bool value[] = {HIGH, HIGH, HIGH, HIGH, HIGH, LOW, HIGH, HIGH, HIGH, HIGH};
-      setLEDRows(value);
-    }
-    else if (spectrumValue[i] < 160 )
-    {
-      bool value[] = {HIGH, HIGH, HIGH, HIGH, HIGH, LOW, LOW, LOW, LOW, LOW};
-      setLEDRows(value);
-    }
-    
-    digitalWrite(strobePin, HIGH);
-  }
-  
-  bool value[] = {LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW};
-  setLEDRows(value); 
 }
 
 void setLEDRows(bool value[]) {
@@ -252,6 +120,3 @@ void setLEDRows(bool value[]) {
     digitalWrite(pinOuts[i], value[i]);
   } 
 }
-
-
-
